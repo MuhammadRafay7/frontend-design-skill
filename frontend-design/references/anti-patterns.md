@@ -12,6 +12,16 @@ These produce the generic "AI-generated" look. Reject them.
 - Decorative SVG blobs or abstract shapes with no purpose
 - Stock-illustration style icons that don't match the product
 
+## Theme
+
+- Shipping only dark (or only light)
+- Invert-filter or brightness hack instead of a second palette
+- Light-mode shadows copied onto dark surfaces
+- Hardcoded hex in components instead of semantic tokens
+- No theme control, or a control that does not persist
+- Flash of the wrong theme on load
+- Contrast that passes in one mode and fails in the other
+
 ## Typography
 
 - Single system font for everything (especially Inter alone with no scale)
@@ -40,4 +50,4 @@ These produce the generic "AI-generated" look. Reject them.
 
 ## Fix approach
 
-When you catch one of these, replace with a deliberate alternative from the main skill: editorial split, real copy, disciplined palette, signature detail, proper type scale.
+When you catch one of these, replace with a deliberate alternative from the main skill: editorial split, real copy, disciplined palette, dual light/dark tokens, signature detail, proper type scale.

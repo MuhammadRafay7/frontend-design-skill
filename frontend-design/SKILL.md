@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: Use whenever creating, reviewing, or improving any frontend UI, layout, styling, or visual design in code — websites, dashboards, landing pages, components, CSS, Tailwind, or any visual output. Produces polished, professional, production-grade design that avoids generic AI aesthetics and matches top design agencies and award-winning sites.
+description: Use whenever creating, reviewing, or improving any frontend UI, layout, styling, or visual design in code — websites, dashboards, landing pages, components, CSS, Tailwind, or any visual output. Produces polished, professional, production-grade design that avoids generic AI aesthetics. Always ships first-class light AND dark themes, not one mode only. Includes a live edit mode — the user clicks elements in a live preview and describes changes, and the agent applies only those changes.
 ---
 
 # Frontend & UI Design
@@ -14,10 +14,23 @@ Every element must have clear intentionality. Spacing, type, color, and layout s
 Commit to at least 3 deliberate decisions per screen:
 - Defined typographic system with editorial hierarchy
 - Layout with visual tension (asymmetry, rhythm, scale contrast)
-- Considered color system with clear mood
+- Considered color system with a clear mood in **both** light and dark
 - Signature detail (distinctive hero, refined micro-interactions, grid break, or crafted illustration style)
 
 Restraint wins: fewer elements, more polish.
+
+## Dual theme is mandatory (critical)
+
+**Do not ship dark-only or light-only.** Light and dark are equal first-class modes.
+
+- Define **semantic tokens** once (`bg`, `surface`, `text`, `muted`, `border`, `accent`, `accent-fg`). Swap values per theme. Never hardcode theme hex in components.
+- Implement **both** palettes before polish. QA both. Contrast must pass in both.
+- Provide a visible **theme control** (sun/moon or Light / Dark / System) unless the user forbids it.
+- Default to **system** (`prefers-color-scheme`). Persist the user's last explicit choice.
+- Prevent flash of the wrong theme: set `html` class/`data-theme` in a tiny inline script before first paint.
+- Depth recipes differ by mode — do not reuse light shadows on dark, or dark hairlines on light.
+
+Full token tables, toggle pattern, and anti-flash script: `references/theming.md`.
 
 ## Anti-AI aesthetics (critical)
 
@@ -30,8 +43,9 @@ Avoid these default AI patterns:
 - Lorem ipsum or placeholder copy
 - Uniform spacing that feels mechanical
 - Shadows that look like CSS defaults
+- Dark-mode-only UIs (or light-only) with no token swap
 
-Prefer: asymmetry, editorial type, disciplined neutrals + one accent, intentional whitespace, real content, crafted details.
+Prefer: asymmetry, editorial type, disciplined neutrals + one accent, intentional whitespace, real content, crafted details, dual theme.
 
 ## Typography
 
@@ -55,22 +69,33 @@ Prefer: asymmetry, editorial type, disciplined neutrals + one accent, intentiona
 
 ## Color, surfaces & depth
 
-- Mostly neutral + ONE accent. No pure black on pure white.
-  - Light: bg #FAFAF9 / #F8F8F7, surface #FFFFFF, text #111113 or #18181B
-  - Dark: bg #0A0A0B / #0E0E11, surface rgba(255,255,255,0.03–0.06), borders white/8–10%, text #F4F4F5
-- 8–10 step scale per color. Use consistently.
-- Depth: subtle layered shadows or hairline borders. Pick one system.
-- Quiet background depth: faint gradient, dot/grid texture, or tinted sections — felt, not noticed.
+- Mostly neutral + ONE accent. No pure `#000` on pure `#FFF`.
+- Same accent family in both modes; shift only lightness so it stays readable on each background.
+- 8–10 step scale per color. Use consistently via tokens.
+- **Light depth:** layered soft shadows (ring + lift + ambient). Surfaces: paper on warm-neutral page.
+- **Dark depth:** hairline `rgba(255,255,255,0.08–0.13)` rings. No heavy drop shadows (they vanish). Surfaces: slightly lifted from near-black.
+- Quiet background depth: faint wash, dot/grid, or tinted sections — felt, not noticed. Recalibrate opacity per theme.
 - Accent only for primary actions and key data.
+
+Default palettes (override to match the product mood, keep both):
+
+| Token | Light | Dark |
+| --- | --- | --- |
+| bg | `#FAFAF9` | `#0A0A0B` |
+| surface | `#FFFFFF` | `rgba(255,255,255,0.04)` |
+| text | `#18181B` | `#F4F4F5` |
+| muted | `#71717A` | `#A1A1AA` |
+| border | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.10)` |
+| accent | product-specific | same hue, lightness shifted |
 
 ## Components & craft
 
-- Buttons: radius 8–10px, weight 500–600, hierarchy (primary / outline / ghost), hover + focus-visible, min-height 40–44px.
-- Cards: hairline border XOR soft shadow. Padding 24–32px. Consistent radius.
-- Icons: Lucide or equivalent, stroke 1.5–2, 16–20px, optically aligned. Prefer icon + label.
-- Forms: labels above, generous padding, inline validation, distinct disabled.
-- Motion: see full system below. Honor `prefers-reduced-motion`.
-- Nav: sticky, blur/backdrop or scroll border, 64–72px height.
+- Buttons: radius 8–10px, weight 500–600, hierarchy (primary / outline / ghost), hover + focus-visible, min height 40–44px.
+- Cards: hairline XOR soft shadow — shadow in light, hairline in dark. Padding 24–32px. Consistent radius.
+- Icons: Lucide or equivalent, stroke 1.5–2, 16–20px, optically aligned. Prefer icon + label. Theme-toggle icons cross-fade.
+- Forms: labels above, generous padding, inline validation, distinct disabled in both themes.
+- Nav: sticky, blur/backdrop or scroll border, 64–72px height. Include the theme control here.
+- Motion: see below. Honor `prefers-reduced-motion`.
 
 ## Motion design
 
@@ -88,6 +113,7 @@ Prefer: asymmetry, editorial type, disciplined neutrals + one accent, intentiona
 
 ### Rules
 - Animate only `transform` + `opacity`. Reinforce hierarchy or remove.
+- Theme switch: swap tokens instantly or fade surfaces 150ms — never flash unstyled colors.
 - Spring presets: snappy (stiffness 400–500, damping 25–30), gentle (200–300 / 20–25), bouncy (300–400 / 12–18), heavy (100–150 / 20, mass 1.5–2).
 
 Full details + spring physics table in `references/motion.md`.
@@ -95,35 +121,49 @@ Full details + spring physics table in `references/motion.md`.
 ## Responsive & states
 
 - Breakpoints: 375 / 768 / 1024 / 1280 / 1440. Mobile-first.
-- Design loading skeletons, empty states with helpful content, errors, success.
+- Design loading skeletons, empty states with helpful content, errors, success — in both themes.
 - Touch targets ≥ 44px. No hover-only on touch.
 
 ## Accessibility
 
-- WCAG AA: 4.5:1 body, 3:1 large text & UI.
-- Semantic HTML, labeled fields, alt text, keyboard nav, visible focus.
+- WCAG AA in **both** themes: 4.5:1 body, 3:1 large text & UI.
+- Semantic HTML, labeled fields, alt text, keyboard nav, visible focus (ring color must work on light and dark).
+- Honor `prefers-color-scheme` and `prefers-reduced-motion`.
 
 ## Process
 
-1. Define brief: product type, audience, mood (enterprise / dev-tool / premium-editorial / playful), light or dark, stack (Tailwind / CSS / shadcn).
-2. State design direction in 2–3 sentences before coding: grid, type pairing, color mood, signature element.
-3. Build skeleton with real content (no lorem).
-4. Polish last: tracking, shadows, transitions, states, spacing rhythm, alignment.
+1. Define brief: product type, audience, mood, stack (Tailwind / CSS / shadcn). Theme is **not** a pick — plan light + dark.
+2. State design direction in 2–3 sentences before coding: grid, type pairing, color mood **for both modes**, signature element.
+3. Tokenize palettes first. Build skeleton with real content (no lorem).
+4. Polish last: tracking, per-theme shadows, transitions, states, spacing, alignment.
+5. Toggle light ↔ dark and audit contrast, borders, images, and elevation.
 
 ## Stack defaults
 
-- Tailwind: tokens in config (`fontFamily`, `colors`, `borderRadius`, `boxShadow`, `letterSpacing`). Avoid arbitrary values except crafted one-offs.
-- shadcn/ui: customize CSS variables to palette before building — never ship default theme.
-- Plain CSS: full token system as custom properties at `:root`.
+- Tailwind: tokens in theme (`fontFamily`, `colors`, `borderRadius`, `boxShadow`, `letterSpacing`). Class or `data-theme` dark variant. Avoid arbitrary values except crafted one-offs.
+- shadcn/ui: customize CSS variables for **both** `:root` and `.dark` before building — never ship the default theme.
+- Plain CSS: custom properties at `:root` (light) and `[data-theme="dark"]` / `.dark` (dark).
 
 ## Quality bar (check before deliver)
 
 - One clear focal point per screen.
 - Type hierarchy unmistakable.
 - Spacing multiples of 4/8, whitespace generous.
-- Palette disciplined (neutral + one accent).
+- Palette disciplined (neutral + one accent) in **both** themes.
 - Interactive elements have hover + focus + active + disabled.
 - Pixel-aligned to grid.
+- Light mode is complete, not an afterthought. Dark mode is complete, not an invert filter.
+- Theme toggle works, persists, and respects system when set to system.
 - Would pass review at a top design studio.
 
-See `references/anti-patterns.md` for common failures and `references/motion.md` for full motion + spring physics.
+## Live edit mode
+
+When the user wants to point at things and describe changes ("live preview", "let me click what to change", "live edit"), run the click-to-instruct loop in `scripts/live-edit.mjs`:
+
+1. Start: `node <skill-dir>/scripts/live-edit.mjs start --target http://localhost:<dev port>` (or with no `--target` for plain HTML) as a background process. Give the user the URL (in VS Code: **Simple Browser: Show**).
+2. Loop: `live-edit.mjs next` → apply exactly that change → `live-edit.mjs done <id> "summary"`.
+3. Scope is strict: change only the clicked element's code, only as instructed.
+
+Full protocol, request format, and scope rules: `references/live-edit.md`.
+
+See `references/theming.md` for dual-theme implementation, `references/anti-patterns.md` for common failures, `references/motion.md` for motion + spring physics, `references/live-edit.md` for live edit mode.
